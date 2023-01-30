@@ -1,5 +1,5 @@
 add_library(
-  dsdgen_c OBJECT
+  dsdgen_c STATIC
   skip_days.cpp
   address.cpp
   build_support.cpp
@@ -51,7 +51,3 @@ add_library(
   w_web_returns.cpp
   w_web_sales.cpp
   w_web_site.cpp)
-
-set(DSDGEN_OBJECT_FILES
-    ${DSDGEN_OBJECT_FILES} $<TARGET_OBJECTS:dsdgen_c>
-    PARENT_SCOPE)
