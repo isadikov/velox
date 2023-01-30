@@ -17,9 +17,11 @@ Then copy the generated files to velox/external/duckdb:
     rsync -vrh src/amalgamation/duckdb* ${VELOX_PATH}/velox/external/duckdb/
     rsync -vrh src/amalgamation/parquet* ${VELOX_PATH}/velox/external/duckdb/
 
-We also maintain a copy of TPC-H dataset generators that need to be updated:
+We also maintain a copy of TPC-H and TPC-DS dataset generators that need to be updated:
 
     rsync -vrh --exclude={'CMakeLists.txt','LICENSE','*.py','dbgen/queries','dbgen/answers'} extension/tpch/ ${VELOX_PATH}/velox/external/duckdb/tpch/
+
+    rsync -vrh --exclude={'CMakeLists.txt','LICENSE','*.py','dsdgen/queries','dsdgen/answers','dsdgen/schema'} extension/tpcds/ ${VELOX_PATH}/velox/external/duckdb/tpcds/
 
 After the new files are copied, ensure that the new code compiles and that it
 doesn't break any tests. Velox relies on many internal APIs, so there is a good

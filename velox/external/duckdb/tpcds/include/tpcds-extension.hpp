@@ -1,0 +1,29 @@
+//===----------------------------------------------------------------------===//
+//                         DuckDB
+//
+// tpcds-extension.hpp
+//
+//
+//===----------------------------------------------------------------------===//
+
+#pragma once
+
+#include "duckdb.hpp"
+#ifndef DUCKDB_AMALGAMATION
+#include "duckdb/main/client_context.hpp"
+#endif
+
+namespace duckdb {
+
+class TPCDSExtension : public Extension {
+public:
+	void Load(DuckDB &db) override;
+	std::string Name() override;
+
+	//! Gets the specified TPC-DS Query number as a string
+	static std::string GetQuery(int query);
+	//! Returns the CSV answer of a TPC-DS query
+	static std::string GetAnswer(double sf, int query);
+};
+
+} // namespace duckdb

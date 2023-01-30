@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 add_subdirectory(tpch)
+add_subdirectory(tpcds)
 
 add_compile_definitions(DISABLE_DUCKDB_REMOTE_INSTALL)
 add_compile_definitions(BUILD_PARQUET_EXTENSION)

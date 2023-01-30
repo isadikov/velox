@@ -6,6 +6,8 @@ external/duckdb/**          -diff -merge
 external/duckdb/**          linguist-vendored=true
 external/duckdb/tpch/**     -diff -merge
 external/duckdb/tpch/**     linguist-vendored=true
+external/duckdb/tpcds/**    -diff -merge
+external/duckdb/tpcds/**    linguist-vendored=true
 external/md5/*              -diff -merge
 external/md5/*              linguist-vendored=true
 external/utf8proc/*         -diff -merge
