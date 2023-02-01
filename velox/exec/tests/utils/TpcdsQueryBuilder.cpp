@@ -126,24 +126,137 @@ TpcdsPlan TpcdsQueryBuilder::getQueryPlan(int queryId) const {
 }
 
 TpcdsPlan TpcdsQueryBuilder::getQ1Plan() const {
- std::vector<std::string> selectedColumns = {"cc_call_center_sk"};
+ auto planNodeIdGenerator = std::make_shared<core::PlanNodeIdGenerator>();
+ core::PlanNodeId dateDimPlanNodeId;
+ core::PlanNodeId storeReturnsPlanNodeId;
+ core::PlanNodeId storePlanNodeId;
+ core::PlanNodeId customerPlanNodeId;
 
- const auto selectedRowType = getRowType(kCallCenter, selectedColumns);
- const auto& fileColumnNames = getFileColumnNames(kCallCenter);
+ // Part 1:
+ // SELECT sr_customer_sk AS ctr_customer_sk,
+ //        sr_store_sk AS ctr_store_sk,
+ //        sum(sr_return_amt) AS ctr_total_return
+ // FROM store_returns,
+ //      date_dim
+ // WHERE sr_returned_date_sk = d_date_sk
+ //   AND d_year = 2000
+ // GROUP BY sr_customer_sk, sr_store_sk
 
- core::PlanNodeId lineitemPlanNodeId;
+ auto customerTotalReturn =
+     PlanBuilder(planNodeIdGenerator)
+         .tableScan(
+             kStoreReturns,
+             ROW(
+                 {"sr_returned_date_sk", "sr_customer_sk", "sr_store_sk", "sr_return_amt"},
+                 {INTEGER(), INTEGER(), INTEGER(), DECIMAL(7, 2)}),
+             {},
+             {})
+         .capturePlanNodeId(storeReturnsPlanNodeId)
+         .hashJoin(
+             {"sr_returned_date_sk"},
+             {"d_date_sk"},
+             PlanBuilder(planNodeIdGenerator)
+                 .tableScan(
+                     kDateDim,
+                     ROW(
+                         {"d_date_sk", "d_year"},
+                         {INTEGER(), BIGINT()}),
+                     {},
+                     {"d_year = 2000"})
+                 .capturePlanNodeId(dateDimPlanNodeId)
+                 .planNode(),
+             "",
+             {"sr_customer_sk", "sr_store_sk", "sr_return_amt"})
+         .partialAggregation(
+             {"sr_customer_sk", "sr_store_sk"},
+             {"sum(sr_return_amt) AS ctr_total_return"})
+         .localPartition({"sr_customer_sk", "sr_store_sk"})
+         .finalAggregation()
+         .project({"sr_customer_sk AS ctr_customer_sk", "sr_store_sk AS ctr_store_sk", "ctr_total_return"});
 
- auto plan =
-     PlanBuilder()
-         .tableScan(kCustomer, selectedRowType, fileColumnNames, {})
-         .capturePlanNodeId(lineitemPlanNodeId)
-         .localPartition({})
+ // TODO: figure out how to clone nodes.
+ auto customerTotalReturnTmp = customerTotalReturn;
+
+ // Part 2:
+ // SELECT avg(ctr_total_return)*1.2
+ // FROM customer_total_return ctr2
+ // WHERE ctr1.ctr_store_sk = ctr2.ctr_store_sk
+
+ auto avgTotalReturn =
+     customerTotalReturnTmp
+         .partialAggregation(
+             {"ctr_store_sk"},
+             {"avg(ctr_total_return) AS avg_ctr_total_return"})
+         .localPartition({"ctr_store_sk"})
+         .finalAggregation()
+         .project({"ctr_store_sk", "cast(avg_ctr_total_return * cast(1.2 as decimal(7, 2)) as decimal(38, 2)) as avg_ctr_total_return"})
+         .planNode();
+ // Part 3:
+ // SELECT c_customer_id
+ // FROM customer_total_return ctr1,
+ //   store,
+ //   customer
+ // WHERE ctr1.ctr_total_return >
+ //  (SELECT avg(ctr_total_return)*1.2
+ //   FROM customer_total_return ctr2
+ //   WHERE ctr1.ctr_store_sk = ctr2.ctr_store_sk)
+ // AND s_store_sk = ctr1.ctr_store_sk
+ // AND s_state = 'TN'
+ // AND ctr1.ctr_customer_sk = c_customer_sk
+ // ORDER BY c_customer_id
+ // LIMIT 100;
+
+ auto finalPlan =
+     customerTotalReturn
+         .hashJoin(
+             {"ctr_store_sk"},
+             {"s_store_sk"},
+             PlanBuilder(planNodeIdGenerator)
+                 .tableScan(
+                     kStore,
+                     ROW(
+                         {"s_store_sk", "s_state"},
+                         {INTEGER(), VARCHAR()}),
+                     {},
+                     {"s_state = 'TN'"})
+                 .capturePlanNodeId(storePlanNodeId)
+                 .planNode(),
+             "",
+             {"ctr_store_sk", "ctr_total_return", "ctr_customer_sk"})
+         .hashJoin(
+             {"ctr_customer_sk"},
+             {"c_customer_sk"},
+             PlanBuilder(planNodeIdGenerator)
+                 .tableScan(
+                     kCustomer,
+                     ROW(
+                         {"c_customer_sk", "c_customer_id"},
+                         {INTEGER(), VARCHAR()}),
+                     {},
+                     {})
+                 .capturePlanNodeId(customerPlanNodeId)
+                 .planNode(),
+             "",
+             {"ctr_store_sk", "c_customer_id", "ctr_total_return"})
+         .hashJoin(
+             {"ctr_store_sk"},
+             {"ctr_store_sk"},
+             avgTotalReturn,
+             "ctr_total_return > avg_ctr_total_return",
+             {"c_customer_id"})
+         .topN({"c_customer_id"}, 100, false)
          .planNode();
 
  TpcdsPlan context;
- context.plan = std::move(plan);
- context.dataFiles[lineitemPlanNodeId] = getTableFilePaths(kCallCenter);
+ context.plan = std::move(finalPlan);
+ context.dataFiles[dateDimPlanNodeId] = getTableFilePaths(kDateDim);
+ context.dataFiles[storeReturnsPlanNodeId] = getTableFilePaths(kStoreReturns);
+ context.dataFiles[storePlanNodeId] = getTableFilePaths(kStore);
+ context.dataFiles[customerPlanNodeId] = getTableFilePaths(kCustomer);
  context.dataFileFormat = format_;
+
+ std::cout << "Plan: " << context.plan->toString(true, true) << std::endl;
+
  return context;
 }
 

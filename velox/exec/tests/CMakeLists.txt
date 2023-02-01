@@ -57,6 +57,7 @@ add_executable(
   TaskListenerTest.cpp
   TaskTest.cpp
   TopNTest.cpp
+  TpcdsQueryBuilderTest.cpp
   TreeOfLosersTest.cpp
   UnorderedStreamReaderTest.cpp
   UnnestTest.cpp
