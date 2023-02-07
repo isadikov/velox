@@ -76,7 +76,7 @@ function prompt {
 }
 
 function install_fmt {
-  github_checkout fmtlib/fmt 8.0.1
+  github_checkout fmtlib/fmt 8.0.0
   cmake_install -DFMT_TEST=OFF
 }
 
