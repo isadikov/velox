@@ -162,7 +162,7 @@ TpcdsPlan TpcdsQueryBuilder::getQ1Plan() const {
          .finalAggregation()
          .project({"sr_customer_sk AS ctr_customer_sk", "sr_store_sk AS ctr_store_sk", "ctr_total_return"});
 
- auto customerTotalReturn2 =
+ auto avgTotalReturn =
      PlanBuilder(planNodeIdGenerator)
          .tableScan(
              kStoreReturns,
@@ -186,18 +186,13 @@ TpcdsPlan TpcdsQueryBuilder::getQ1Plan() const {
          .partialAggregation(
              {"sr_customer_sk", "sr_store_sk"},
              {"sum(sr_return_amt) AS ctr_total_return"})
-         .localPartition({"sr_customer_sk", "sr_store_sk"})
-         .finalAggregation()
-         .project({"sr_customer_sk AS ctr_customer_sk", "sr_store_sk AS ctr_store_sk", "ctr_total_return"});
-
- auto avgTotalReturn =
-     customerTotalReturn2
+         .intermediateAggregation()
          .partialAggregation(
-             {"ctr_store_sk"},
+             {"sr_store_sk"},
              {"avg(ctr_total_return) AS avg_ctr_total_return"})
-         .localPartition({"ctr_store_sk"})
+         .localPartition({"sr_store_sk"})
          .finalAggregation()
-         .project({"ctr_store_sk", "avg_ctr_total_return * 1.2 as avg_ctr_total_return"})
+         .project({"sr_store_sk as ctr_store_sk", "avg_ctr_total_return * 1.2 as avg_ctr_total_return"})
          .planNode();
 
  auto finalPlan =
@@ -216,6 +211,12 @@ TpcdsPlan TpcdsQueryBuilder::getQ1Plan() const {
              "",
              {"ctr_store_sk", "ctr_total_return", "ctr_customer_sk"})
          .hashJoin(
+             {"ctr_store_sk"},
+             {"ctr_store_sk"},
+             avgTotalReturn,
+             "ctr_total_return > avg_ctr_total_return",
+             {"ctr_customer_sk"})
+         .hashJoin(
              {"ctr_customer_sk"},
              {"c_customer_sk"},
              PlanBuilder(planNodeIdGenerator)
@@ -227,12 +228,6 @@ TpcdsPlan TpcdsQueryBuilder::getQ1Plan() const {
                  .capturePlanNodeId(customerPlanNodeId)
                  .planNode(),
              "",
-             {"ctr_store_sk", "c_customer_id", "ctr_total_return"})
-         .hashJoin(
-             {"ctr_store_sk"},
-             {"ctr_store_sk"},
-             avgTotalReturn,
-             "ctr_total_return > avg_ctr_total_return",
              {"c_customer_id"})
          .topN({"c_customer_id"}, 100, false)
          .planNode();
