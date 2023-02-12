@@ -18,6 +18,7 @@
 #include "velox/duckdb/conversion/DuckConversion.h"
 #include "velox/external/duckdb/duckdb.hpp"
 #include "velox/external/duckdb/tpch/include/tpch-extension.hpp"
+#include "velox/external/duckdb/tpcds/include/tpcds-extension.hpp"
 #include "velox/vector/FlatVector.h"
 
 namespace facebook::velox::duckdb {
@@ -64,6 +65,7 @@ DuckDBWrapper::DuckDBWrapper(core::ExecCtx* context, const char* path)
   db_ = std::make_unique<DuckDB>(path);
   connection_ = std::make_unique<Connection>(*db_);
   db_->LoadExtension<::duckdb::TPCHExtension>();
+  db_->LoadExtension<::duckdb::TPCDSExtension>();
 }
 
 DuckDBWrapper::~DuckDBWrapper() {}
