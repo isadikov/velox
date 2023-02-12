@@ -884,6 +884,12 @@ void DuckDbQueryRunner::initializeTpch(double scaleFactor) {
   execute(query);
 }
 
+void DuckDbQueryRunner::initializeTpcds(double scaleFactor) {
+  db_.LoadExtension<::duckdb::TPCDSExtension>();
+  auto query = fmt::format("CALL dsdgen(sf={})", scaleFactor);
+  execute(query);
+}
+
 DuckDBQueryResult DuckDbQueryRunner::execute(const std::string& sql) {
   ::duckdb::Connection con(db_);
   // Changing the default null order of NULLS FIRST used by DuckDB. Velox uses
