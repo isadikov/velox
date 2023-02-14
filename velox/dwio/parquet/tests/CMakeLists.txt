@@ -25,6 +25,20 @@ set(TEST_LINK_LIBS
 add_subdirectory(duckdb_reader)
 add_subdirectory(reader)
 
+add_executable(velox_dwio_parquet_tpcds_test ParquetTpcdsTest.cpp)
+add_test(
+  NAME velox_dwio_parquet_tpcds_test
+  COMMAND velox_dwio_parquet_tpcds_test
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(
+  velox_dwio_parquet_tpcds_test
+  velox_dwio_parquet_reader
+  velox_exec_test_lib
+  velox_exec
+  velox_hive_connector
+  velox_aggregates
+  ${TEST_LINK_LIBS})
+
 add_executable(velox_dwio_parquet_tpch_test ParquetTpchTest.cpp)
 add_test(
   NAME velox_dwio_parquet_tpch_test
