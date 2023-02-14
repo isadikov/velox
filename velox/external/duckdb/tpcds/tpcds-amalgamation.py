@@ -33,7 +33,6 @@ DSDGEN_C_FILES = [
     "dsdgen/include/dsdgen-c/r_params.h",
     "dsdgen/include/dsdgen-c/dist.h",
     "dsdgen/include/dsdgen-c/address.h",
-    "dsdgen/include/dsdgen-c/w_customer_address.h",
     "dsdgen/include/dsdgen-c/tdef_functions.h",
     "dsdgen/include/dsdgen-c/tpcds.idx.h",
     "dsdgen/include/dsdgen-c/skip_days.h",
@@ -53,9 +52,7 @@ DSDGEN_C_FILES = [
     "dsdgen/include/dsdgen-c/w_inventory.h",
     "dsdgen/include/dsdgen-c/w_warehouse.h",
     "dsdgen/include/dsdgen-c/w_customer_address.h",
-    "dsdgen/include/dsdgen-c/s_tdefs.h",
     "dsdgen/include/dsdgen-c/tdefs.h",
-    "dsdgen/include/dsdgen-c/w_tdefs.h",
     "dsdgen/include/dsdgen-c/dcomp.h",
     "dsdgen/include/dsdgen-c/w_web_site.h",
     "dsdgen/include/dsdgen-c/w_item.h",
@@ -77,7 +74,6 @@ DSDGEN_C_FILES = [
     "dsdgen/include/dsdgen-c/w_catalog_returns.h",
     "dsdgen/include/dsdgen-c/streams.h",
     "dsdgen/include/dsdgen-c/params.h",
-    "dsdgen/include/dsdgen-c/r_params.h",
 
     # C/C++ files.
     "dsdgen/dsdgen-c/init.cpp",
@@ -92,7 +88,6 @@ DSDGEN_C_FILES = [
     "dsdgen/dsdgen-c/nulls.cpp",
     "dsdgen/dsdgen-c/misc.cpp",
     "dsdgen/dsdgen-c/address.cpp",
-    "dsdgen/dsdgen-c/w_customer_address.cpp",
     "dsdgen/dsdgen-c/permute.cpp",
     "dsdgen/dsdgen-c/text.cpp",
     "dsdgen/dsdgen-c/parallel.cpp",
@@ -133,6 +128,20 @@ DSDGEN_C_FILES = [
     "dsdgen/dsdgen-c/w_catalog_sales.cpp",
 ]
 
+DSDGEN_C_EXPLICIT_DEPS = {
+    "dbgen_version.h": ["porting.h"],
+    "nulls.h": ["porting.h"],
+    "parallel.h": ["porting.h"],
+    "permute.h": ["porting.h"],
+    "scaling.h": ["porting.h"],
+    "sparse.h": ["porting.h"],
+    "streams.h": ["genrand.h"],
+    "tdef_functions.h": ["porting.h"],
+    "s_tdefs.h": ["tdefs.h"],
+    "w_tdefs.h": ["tdefs.h"],
+    "w_web_returns.h": ["porting.h", "pricing.h"],
+}
+
 # These files are required for TPC-DS to run with DuckDB.
 DUCK_DB_DSDGEN_FILES = [
     "dsdgen/append_info-c.cpp",
@@ -158,6 +167,15 @@ def is_dsdgen_import(line):
     include = line.strip().split(" ")[-1].strip("\"")
     return include in [os.path.basename(path) for path in DSDGEN_C_FILES]
 
+def get_namespace(file):
+    file_name = os.path.basename(file)
+    file_namespace = os.path.splitext(file_name)[0]
+    return "__" + file_namespace.replace(".", "_") + "__"
+
+def include_to_using(line):
+    include = line.strip().split(" ")[-1].strip("\"")
+    return "using namespace %s;" % get_namespace(include)
+
 def find_files(root):
     output = []
     for root, dirs, files in os.walk(root):
@@ -176,18 +194,26 @@ def rewrite_file_with_duckdb_include(path):
 
     # Replace imports.
     out = []
+    add_duckdb_internal_import = True
     add_duckdb_import = True
     add_dsdgen_import = True
 
     for i in range(len(lines)):
         if "#include" in lines[i] and "duckdb" in lines[i]:
-            if add_duckdb_import:
-                # Replace the import with our own.
-                out.append("#include \"duckdb.hpp\"\n")
-                add_duckdb_import = False
+            if "duckdb/parser" in lines[i]:
+                if add_duckdb_internal_import:
+                    # Replace the import with our own.
+                    out.append("#include \"duckdb-internal.hpp\"\n")
+                    add_duckdb_internal_import = False
+                else:
+                    continue # Ignore the import.
             else:
-                # Ignore the import.
-                continue
+                if add_duckdb_import:
+                    # Replace the import with our own.
+                    out.append("#include \"duckdb.hpp\"\n")
+                    add_duckdb_import = False
+                else:
+                    continue # Ignore the import.
         elif "#include" in lines[i] and is_dsdgen_import(lines[i]):
             if add_dsdgen_import:
                 # Replace the import with our own.
@@ -201,17 +227,38 @@ def rewrite_file_with_duckdb_include(path):
         for line in out:
             f.write(line)
 
-def write_file(path, out):
+def write_header_file(path, out):
+    file_name = os.path.basename(path)
+    file_namespace = get_namespace(path)
+
     with open(path, "r") as f:
+        out.write("namespace %s {\n" % file_namespace)
+        out.write("\n")
+
+        # Unfortunately, some files need manual patching due to undeclared
+        # dependencies.
+        if file_name in DSDGEN_C_EXPLICIT_DEPS:
+            for dep in DSDGEN_C_EXPLICIT_DEPS[file_name]:
+                out.write(include_to_using(dep))
+                out.write("\n")
+
         for line in f:
-            out.write(line)
+            if "#include" in line and is_dsdgen_import(line):
+                out.write(include_to_using(line))
+                out.write("\n")
+            else:
+                out.write(line)
+        out.write("\n")
+        out.write("} // %s\n" % file_namespace)
 
 def merge_dsdgen_files(files, out_header_path, out_source_path):
     with open(out_header_path, "w") as f:
         for path in files:
             if is_header(path):
+                f.write("\n")
                 f.write("// %s\n" % os.path.basename(path))
-                write_file(path, f)
+                f.write("\n")
+                write_header_file(path, f)
                 f.write("\n")
 
 if __name__ == "__main__":
@@ -228,13 +275,13 @@ if __name__ == "__main__":
         raise ValueError("Cannot find TPC-DS extension directory in DuckDB repository")
 
     # 1. Copy DuckDB-related files as they are:
-    for path in DUCK_DB_DSDGEN_FILES:
-        full_path = os.path.join(current_dir, path)
-        base_dir = os.path.dirname(full_path)
-        if base_dir:
-            os.makedirs(base_dir, exist_ok=True)
-        shutil.copy2(os.path.join(tpcds_root_path, path), base_dir)
-        rewrite_file_with_duckdb_include(full_path)
+    # for path in DUCK_DB_DSDGEN_FILES:
+    #     full_path = os.path.join(current_dir, path)
+    #     base_dir = os.path.dirname(full_path)
+    #     if base_dir:
+    #         os.makedirs(base_dir, exist_ok=True)
+    #     shutil.copy2(os.path.join(tpcds_root_path, path), base_dir)
+    #     rewrite_file_with_duckdb_include(full_path)
 
     # 2. Create the folders for the dsdgen combined files.
     out_header_path = os.path.join(current_dir, "dsdgen/include/dsdgen-c", DSDGEN_COMBINED_HPP)
