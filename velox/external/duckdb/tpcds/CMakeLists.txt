@@ -5,7 +5,9 @@ project(TPCDSExtension)
 
 include_directories(include)
 include_directories(dsdgen/include)
+include_directories(dsdgen/dsdgen-c/include)
 include_directories(..)
 add_subdirectory(dsdgen)
 
 add_library(tpcds_extension STATIC tpcds-extension.cpp)
+target_link_libraries(tpcds_extension dsdgen)

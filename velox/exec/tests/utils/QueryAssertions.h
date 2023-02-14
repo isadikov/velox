@@ -19,6 +19,7 @@
 #include "velox/exec/tests/utils/Cursor.h"
 #include "velox/external/duckdb/duckdb.hpp"
 #include "velox/external/duckdb/tpch/include/tpch-extension.hpp"
+#include "velox/external/duckdb/tpcds/include/tpcds-extension.hpp"
 #include "velox/vector/ComplexVector.h"
 
 namespace facebook::velox::exec::test {
@@ -78,6 +79,14 @@ class DuckDbQueryRunner {
   }
 
   void initializeTpch(double scaleFactor);
+
+  // Returns the DuckDB TPC-DS Extension Query as string for a given 'queryNo'
+  // Example: queryNo = 1 returns the TPC-DS Query1 in the TPC-DS Extension
+  std::string getTpcdsQuery(int queryNo) {
+    return ::duckdb::TPCDSExtension::GetQuery(queryNo);
+  }
+
+  void initializeTpcds(double scaleFactor);
 
  private:
   ::duckdb::DuckDB db_;

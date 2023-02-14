@@ -22,8 +22,6 @@ DSDGEN_C_FILES = [
     "dsdgen/include/dsdgen-c/w_web_page.h",
     "dsdgen/include/dsdgen-c/w_household_demographics.h",
     "dsdgen/include/dsdgen-c/StringBuffer.h",
-    "dsdgen/include/dsdgen-c/parallel.h",
-    "dsdgen/include/dsdgen-c/scaling.h",
     "dsdgen/include/dsdgen-c/misc.h",
     "dsdgen/include/dsdgen-c/grammar_support.h",
     "dsdgen/include/dsdgen-c/w_reason.h",
@@ -46,6 +44,10 @@ DSDGEN_C_FILES = [
     "dsdgen/include/dsdgen-c/sparse.h",
     "dsdgen/include/dsdgen-c/nulls.h",
     "dsdgen/include/dsdgen-c/permute.h",
+    "dsdgen/include/dsdgen-c/genrand.h",
+    "dsdgen/include/dsdgen-c/streams.h",
+    "dsdgen/include/dsdgen-c/scaling.h",
+    "dsdgen/include/dsdgen-c/parallel.h",
     "dsdgen/include/dsdgen-c/w_customer_demographics.h",
     "dsdgen/include/dsdgen-c/w_timetbl.h",
     "dsdgen/include/dsdgen-c/w_ship_mode.h",
@@ -61,7 +63,6 @@ DSDGEN_C_FILES = [
     "dsdgen/include/dsdgen-c/pricing.h",
     "dsdgen/include/dsdgen-c/append_info.h",
     "dsdgen/include/dsdgen-c/w_store.h",
-    "dsdgen/include/dsdgen-c/genrand.h",
     "dsdgen/include/dsdgen-c/w_tdefs.h",
     "dsdgen/include/dsdgen-c/s_tdefs.h",
     "dsdgen/include/dsdgen-c/w_call_center.h",
@@ -72,66 +73,65 @@ DSDGEN_C_FILES = [
     "dsdgen/include/dsdgen-c/w_web_sales.h",
     "dsdgen/include/dsdgen-c/w_store_returns.h",
     "dsdgen/include/dsdgen-c/w_catalog_returns.h",
-    "dsdgen/include/dsdgen-c/streams.h",
     "dsdgen/include/dsdgen-c/params.h",
 
     # C/C++ files.
-    "dsdgen/dsdgen-c/init.cpp",
-    "dsdgen/dsdgen-c/load.cpp",
-    "dsdgen/dsdgen-c/StringBuffer.cpp",
-    "dsdgen/dsdgen-c/release.cpp",
-    "dsdgen/dsdgen-c/error_msg.cpp",
-    "dsdgen/dsdgen-c/decimal.cpp",
     "dsdgen/dsdgen-c/skip_days.cpp",
-    "dsdgen/dsdgen-c/date.cpp",
-    "dsdgen/dsdgen-c/r_params.cpp",
-    "dsdgen/dsdgen-c/nulls.cpp",
-    "dsdgen/dsdgen-c/misc.cpp",
     "dsdgen/dsdgen-c/address.cpp",
-    "dsdgen/dsdgen-c/permute.cpp",
-    "dsdgen/dsdgen-c/text.cpp",
-    "dsdgen/dsdgen-c/parallel.cpp",
-    "dsdgen/dsdgen-c/sparse.cpp",
-    "dsdgen/dsdgen-c/scaling.cpp",
-    "dsdgen/dsdgen-c/dist.cpp",
-    "dsdgen/dsdgen-c/tdefs.cpp",
-    "dsdgen/dsdgen-c/w_warehouse.cpp",
     "dsdgen/dsdgen-c/build_support.cpp",
-    "dsdgen/dsdgen-c/w_customer.cpp",
-    "dsdgen/dsdgen-c/w_web_site.cpp",
-    "dsdgen/dsdgen-c/w_reason.cpp",
-    "dsdgen/dsdgen-c/w_timetbl.cpp",
-    "dsdgen/dsdgen-c/w_inventory.cpp",
-    "dsdgen/dsdgen-c/w_household_demographics.cpp",
-    "dsdgen/dsdgen-c/w_promotion.cpp",
-    "dsdgen/dsdgen-c/w_customer_demographics.cpp",
-    "dsdgen/dsdgen-c/w_customer_address.cpp",
-    "dsdgen/dsdgen-c/w_income_band.cpp",
-    "dsdgen/dsdgen-c/w_store.cpp",
-    "dsdgen/dsdgen-c/w_datetbl.cpp",
-    "dsdgen/dsdgen-c/w_web_page.cpp",
+    "dsdgen/dsdgen-c/date.cpp",
     "dsdgen/dsdgen-c/dbgen_version.cpp",
-    "dsdgen/dsdgen-c/w_catalog_page.cpp",
-    "dsdgen/dsdgen-c/w_ship_mode.cpp",
-    "dsdgen/dsdgen-c/w_call_center.cpp",
-    "dsdgen/dsdgen-c/w_item.cpp",
-    "dsdgen/dsdgen-c/w_web_sales.cpp",
-    "dsdgen/dsdgen-c/pricing.cpp",
-    "dsdgen/dsdgen-c/w_web_returns.cpp",
-    "dsdgen/dsdgen-c/join.cpp",
-    "dsdgen/dsdgen-c/w_store_sales.cpp",
-    "dsdgen/dsdgen-c/w_store_returns.cpp",
-    "dsdgen/dsdgen-c/tdef_functions.cpp",
-    "dsdgen/dsdgen-c/w_catalog_returns.cpp",
-    "dsdgen/dsdgen-c/scd.cpp",
+    "dsdgen/dsdgen-c/decimal.cpp",
+    "dsdgen/dsdgen-c/dist.cpp",
+    "dsdgen/dsdgen-c/error_msg.cpp",
     "dsdgen/dsdgen-c/genrand.cpp",
+    "dsdgen/dsdgen-c/init.cpp",
+    "dsdgen/dsdgen-c/join.cpp",
+    "dsdgen/dsdgen-c/load.cpp",
+    "dsdgen/dsdgen-c/misc.cpp",
+    "dsdgen/dsdgen-c/nulls.cpp",
+    "dsdgen/dsdgen-c/parallel.cpp",
+    "dsdgen/dsdgen-c/permute.cpp",
+    "dsdgen/dsdgen-c/pricing.cpp",
+    "dsdgen/dsdgen-c/r_params.cpp",
+    "dsdgen/dsdgen-c/release.cpp",
+    "dsdgen/dsdgen-c/scaling.cpp",
+    "dsdgen/dsdgen-c/scd.cpp",
+    "dsdgen/dsdgen-c/sparse.cpp",
+    "dsdgen/dsdgen-c/StringBuffer.cpp",
+    "dsdgen/dsdgen-c/tdef_functions.cpp",
+    "dsdgen/dsdgen-c/tdefs.cpp",
+    "dsdgen/dsdgen-c/text.cpp",
+    "dsdgen/dsdgen-c/w_call_center.cpp",
+    "dsdgen/dsdgen-c/w_catalog_page.cpp",
+    "dsdgen/dsdgen-c/w_catalog_returns.cpp",
     "dsdgen/dsdgen-c/w_catalog_sales.cpp",
+    "dsdgen/dsdgen-c/w_customer.cpp",
+    "dsdgen/dsdgen-c/w_customer_address.cpp",
+    "dsdgen/dsdgen-c/w_customer_demographics.cpp",
+    "dsdgen/dsdgen-c/w_datetbl.cpp",
+    "dsdgen/dsdgen-c/w_household_demographics.cpp",
+    "dsdgen/dsdgen-c/w_income_band.cpp",
+    "dsdgen/dsdgen-c/w_inventory.cpp",
+    "dsdgen/dsdgen-c/w_item.cpp",
+    "dsdgen/dsdgen-c/w_promotion.cpp",
+    "dsdgen/dsdgen-c/w_reason.cpp",
+    "dsdgen/dsdgen-c/w_ship_mode.cpp",
+    "dsdgen/dsdgen-c/w_store.cpp",
+    "dsdgen/dsdgen-c/w_store_returns.cpp",
+    "dsdgen/dsdgen-c/w_store_sales.cpp",
+    "dsdgen/dsdgen-c/w_timetbl.cpp",
+    "dsdgen/dsdgen-c/w_warehouse.cpp",
+    "dsdgen/dsdgen-c/w_web_page.cpp",
+    "dsdgen/dsdgen-c/w_web_returns.cpp",
+    "dsdgen/dsdgen-c/w_web_sales.cpp",
+    "dsdgen/dsdgen-c/w_web_site.cpp",
 ]
 
 DSDGEN_C_EXPLICIT_DEPS = {
     "dbgen_version.h": ["porting.h"],
     "nulls.h": ["porting.h"],
-    "parallel.h": ["porting.h"],
+    "parallel.h": ["porting.h", "streams.h"],
     "permute.h": ["porting.h"],
     "scaling.h": ["porting.h"],
     "sparse.h": ["porting.h"],
@@ -242,10 +242,10 @@ def write_cpp_file(path, out):
                 out.write(include_to_using(dep))
                 out.write("\n")
 
-        # If we are rewriting a C++ file, link its own header file.
-        if is_source(file_name):
-            out.write(include_to_using(file_name))
-            out.write("\n")
+        # # If we are rewriting a C++ file, link its own header file.
+        # if is_source(file_name):
+        #     out.write(include_to_using(file_name))
+        #     out.write("\n")
 
         for line in f:
             if "#include" in line and is_dsdgen_import(line):
@@ -259,6 +259,12 @@ def write_cpp_file(path, out):
 def merge_dsdgen_files(files, out_header_path, out_source_path):
     # Write the header.
     with open(out_header_path, "w") as f:
+        # Header file requires some standard imports.
+        # TODO: check this.
+        f.write("#include <stdio.h>\n")
+        f.write("#include <ctype.h>\n")
+        f.write("#include <math.h>\n")
+        f.write("\n")
         for path in files:
             if is_header(path):
                 f.write("\n")

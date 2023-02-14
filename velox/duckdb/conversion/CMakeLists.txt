@@ -14,7 +14,7 @@
 add_library(velox_duckdb_conversion DuckConversion.cpp DuckWrapper.cpp)
 
 target_link_libraries(velox_duckdb_conversion velox_core velox_vector duckdb
-                      tpch_extension)
+                      tpch_extension tpcds_extension)
 
 add_library(velox_duckdb_parser DuckParser.cpp)
 
