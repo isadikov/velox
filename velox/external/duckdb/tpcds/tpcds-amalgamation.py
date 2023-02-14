@@ -227,7 +227,7 @@ def rewrite_file_with_duckdb_include(path):
         for line in out:
             f.write(line)
 
-def write_header_file(path, out):
+def write_cpp_file(path, out):
     file_name = os.path.basename(path)
     file_namespace = get_namespace(path)
 
@@ -242,6 +242,11 @@ def write_header_file(path, out):
                 out.write(include_to_using(dep))
                 out.write("\n")
 
+        # If we are rewriting a C++ file, link its own header file.
+        if is_source(file_name):
+            out.write(include_to_using(file_name))
+            out.write("\n")
+
         for line in f:
             if "#include" in line and is_dsdgen_import(line):
                 out.write(include_to_using(line))
@@ -252,14 +257,27 @@ def write_header_file(path, out):
         out.write("} // %s\n" % file_namespace)
 
 def merge_dsdgen_files(files, out_header_path, out_source_path):
+    # Write the header.
     with open(out_header_path, "w") as f:
         for path in files:
             if is_header(path):
                 f.write("\n")
                 f.write("// %s\n" % os.path.basename(path))
                 f.write("\n")
-                write_header_file(path, f)
+                write_cpp_file(path, f)
                 f.write("\n")
+    # Write the source.
+    with open(out_source_path, "w") as f:
+        f.write("#include \"%s\"" % DSDGEN_COMBINED_HPP)
+        f.write("\n")
+        for path in files:
+            if is_source(path):
+                f.write("\n")
+                f.write("// %s\n" % os.path.basename(path))
+                f.write("\n")
+                write_cpp_file(path, f)
+                f.write("\n")
+
 
 if __name__ == "__main__":
     # Path to duckdb git repository.
@@ -284,7 +302,7 @@ if __name__ == "__main__":
     #     rewrite_file_with_duckdb_include(full_path)
 
     # 2. Create the folders for the dsdgen combined files.
-    out_header_path = os.path.join(current_dir, "dsdgen/include/dsdgen-c", DSDGEN_COMBINED_HPP)
+    out_header_path = os.path.join(current_dir, "dsdgen/dsdgen-c/include", DSDGEN_COMBINED_HPP)
     out_source_path = os.path.join(current_dir, "dsdgen/dsdgen-c", DSDGEN_COMBINED_CPP)
 
     os.makedirs(os.path.dirname(out_header_path), exist_ok=True)
