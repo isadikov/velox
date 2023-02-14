@@ -9,6 +9,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+message("-- Check TPC-DS dsdgen")
+execute_process(
+  COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/tpcds/tpcds.py ${CMAKE_CURRENT_SOURCE_DIR}/tpcds
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tpcds)
+
+add_subdirectory(tpcds)
 add_subdirectory(tpch)
 
 add_compile_definitions(DISABLE_DUCKDB_REMOTE_INSTALL)
@@ -34,7 +40,7 @@ endif()
 # been the source of a lot of compiler bug reports
 # (e.g. https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99578), which causes
 # parquet-amalgamation.cpp to fail to compile. For now, we disable this warning
-# on the affected compiler (GCC). 
+# on the affected compiler (GCC).
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_compile_options(-Wno-stringop-overflow)
 endif()

@@ -25,6 +25,7 @@ add_library(
   PlanBuilder.cpp
   QueryAssertions.cpp
   SumNonPODAggregate.cpp
+  TpcdsQueryBuilder.cpp
   TpchQueryBuilder.cpp)
 
 target_link_libraries(

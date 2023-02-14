@@ -18,6 +18,7 @@
 #include "velox/exec/Operator.h"
 #include "velox/exec/tests/utils/Cursor.h"
 #include "velox/external/duckdb/duckdb.hpp"
+#include "velox/external/duckdb/tpcds/include/tpcds-extension.hpp"
 #include "velox/external/duckdb/tpch/include/tpch-extension.hpp"
 #include "velox/vector/ComplexVector.h"
 
@@ -66,6 +67,13 @@ class DuckDbQueryRunner {
     return allRows;
   }
 
+  // Returns the DuckDB TPC-DS Extension Query as string for a given 'queryNo'
+  // Example: queryNo = 1 returns the TPC-DS Query1 in the TPC-DS Extension
+  std::string getTpcdsQuery(int queryNo) {
+    auto queryString = ::duckdb::TPCDSExtension::GetQuery(queryNo);
+    return queryString;
+  }
+
   // Returns the DuckDB TPC-H Extension Query as string for a given 'queryNo'
   // Example: queryNo = 1 returns the TPC-H Query1 in the TPC-H Extension
   std::string getTpchQuery(int queryNo) {
@@ -76,6 +84,8 @@ class DuckDbQueryRunner {
     queryString.pop_back(); // remove semi-colon
     return queryString;
   }
+
+  void initializeTpcds(double scaleFactor);
 
   void initializeTpch(double scaleFactor);
 
