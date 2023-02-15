@@ -217,7 +217,7 @@ def main():
     # Path to duckdb git repository.
     working_dir = sys.argv[1]
     reload_fully = bool(sys.argv[2]) if len(sys.argv) > 2 else False
-    print("-- Configuring TPC-DS dataset in:", working_dir, reload_fully)
+    print("-- Configuring TPC-DS dataset in: %s (full reload %s)" % (working_dir, reload_fully))
 
     status = get_status_info(working_dir)
     if status and status.get("commit") == DUCKDB_COMMIT:
@@ -227,7 +227,6 @@ def main():
             "change the content of the file or remove it" % STATUS_INFO)
         return
 
-    print("   Prepare TPC-DS dataset")
     tmp_dir = new_tmp_path()
 
     try:

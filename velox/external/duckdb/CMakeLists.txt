@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+message("-- Check TPC-DS dsdgen")
 execute_process(
   COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/tpcds/tpcds.py ${CMAKE_CURRENT_SOURCE_DIR}/tpcds
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tpcds)
