@@ -160,6 +160,15 @@ third_party/nvml/
 third_party/logcabin/
 
 #==============================================================================#
+# TPC-DS
+#==============================================================================#
+velox/external/duckdb/tpcds/dsdgen/dsdgen-c
+velox/external/duckdb/tpcds/dsdgen/include/dsdgen-c
+velox/external/duckdb/tpcds/dsdgen/include/tpcds_constants.hpp
+velox/external/duckdb/tpcds/dsdgen/include/tpcds_idx.hpp
+velox/external/duckdb/tpcds/status_info.txt
+
+#==============================================================================#
 # Eclipse
 #==============================================================================#
 
