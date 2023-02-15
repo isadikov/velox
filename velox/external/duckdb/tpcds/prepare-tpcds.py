@@ -198,38 +198,41 @@ def get_status_info(path):
 def main():
     # Path to duckdb git repository.
     working_dir = sys.argv[1]
-    print("-- Configuring TPC-DS dataset in", working_dir)
+    reload_fully = bool(sys.argv[2]) if len(sys.argv) > 2 else False
+    print("-- Configuring TPC-DS dataset in:", working_dir, reload_fully)
 
     status = get_status_info(working_dir)
     if status and status.get("commit") == DUCKDB_COMMIT:
         print(
-            "Nothing to do, '%s' file is up to date. "
+            "   Nothing to do, '%s' file is up to date. "
             "If you would like to reload TPC-DS dsdgen, "
             "change the content of the file or remove it" % STATUS_INFO)
         return
 
-    print("Prepare TPC-DS dataset")
+    print("   Prepare TPC-DS dataset")
     tmp_dir = tmp_path()
 
     # git_checkout(DUCKDB_REPO, tmp_path())
 
     from_path = os.path.join(tmp_dir, "extension", "tpcds")
     to_path = os.path.join(working_dir)
-    cp_files(from_path, to_path)
+    cp_files(from_path, to_path, reload_fully)
 
     # Generate CMakeLists.txt files.
     write_file(
         os.path.join(to_path, "dsdgen", "dsdgen-c", "CMakeLists.txt"),
         dsdgen_c_cmake()
     )
-    write_file(
-        os.path.join(to_path, "dsdgen", "CMakeLists.txt"),
-        dsdgen_cmake()
-    )
-    write_file(
-        os.path.join(to_path, "CMakeLists.txt"),
-        root_cmake()
-    )
+
+    if reload_fully:
+        write_file(
+            os.path.join(to_path, "dsdgen", "CMakeLists.txt"),
+            dsdgen_cmake()
+        )
+        write_file(
+            os.path.join(to_path, "CMakeLists.txt"),
+            root_cmake()
+        )
 
     write_status_info(working_dir, DUCKDB_COMMIT)
 
