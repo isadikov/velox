@@ -11,7 +11,7 @@
 # limitations under the License.
 
 execute_process(
-  COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/tpcds/prepare-tpcds.py ${CMAKE_CURRENT_SOURCE_DIR}/tpcds
+  COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/tpcds/tpcds.py ${CMAKE_CURRENT_SOURCE_DIR}/tpcds
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tpcds)
 
 add_subdirectory(tpcds)
