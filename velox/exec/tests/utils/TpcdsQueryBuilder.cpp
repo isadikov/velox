@@ -20,53 +20,6 @@
 
 namespace facebook::velox::exec::test {
 
-namespace {
-int64_t toDate(std::string_view stringDate) {
- Date date;
- parseTo(stringDate, date);
- return date.days();
-}
-
-/// DWRF does not support Date type and Varchar is used.
-/// Return the Date filter expression as per data format.
-std::string formatDateFilter(
-   const std::string& stringDate,
-   const RowTypePtr& rowType,
-   const std::string& lowerBound,
-   const std::string& upperBound) {
- bool isDwrf = rowType->findChild(stringDate)->isVarchar();
- auto suffix = isDwrf ? "" : "::DATE";
-
- if (!lowerBound.empty() && !upperBound.empty()) {
-   return fmt::format(
-       "{} between {}{} and {}{}",
-       stringDate,
-       lowerBound,
-       suffix,
-       upperBound,
-       suffix);
- } else if (!lowerBound.empty()) {
-   return fmt::format("{} > {}{}", stringDate, lowerBound, suffix);
- } else if (!upperBound.empty()) {
-   return fmt::format("{} < {}{}", stringDate, upperBound, suffix);
- }
-
- VELOX_FAIL(
-     "Date range check expression must have either a lower or an upper bound");
-}
-
-std::vector<std::string> mergeColumnNames(
-   const std::vector<std::string>& firstColumnVector,
-   const std::vector<std::string>& secondColumnVector) {
- std::vector<std::string> mergedColumnVector = std::move(firstColumnVector);
- mergedColumnVector.insert(
-     mergedColumnVector.end(),
-     secondColumnVector.begin(),
-     secondColumnVector.end());
- return mergedColumnVector;
-};
-} // namespace
-
 void TpcdsQueryBuilder::initialize(const std::string& dataPath) {
  for (const auto& [tableName, columns] : kTables_) {
    const fs::path tablePath{dataPath + "/" + tableName};
