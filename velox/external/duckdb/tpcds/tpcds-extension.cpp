@@ -155,7 +155,7 @@ void TPCDSExtension::Load(DuckDB &db) {
 	CreateTableFunctionInfo dsdgen_info(dsdgen_func);
 
 	// create the dsdgen function
-	auto &catalog = Catalog::GetSystemCatalog(*con.context);
+	auto &catalog = Catalog::GetCatalog(*con.context);
 	catalog.CreateTableFunction(*con.context, &dsdgen_info);
 
 	// create the TPCDS pragma that allows us to run the query
