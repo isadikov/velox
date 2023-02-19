@@ -424,6 +424,7 @@ class DecimalAverageAggregate : public exec::Aggregate {
       });
     } else {
       rows.applyToSelected([&](vector_size_t i) {
+        clearNull(groups[i]);
         auto decodedIndex = decodedPartial_.index(i);
         auto serializedAccumulator =
             intermediateFlatVector->valueAt(decodedIndex);

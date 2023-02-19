@@ -87,6 +87,9 @@ TpcdsPlan TpcdsQueryBuilder::getQ1Plan() const {
  core::PlanNodeId storePlanNodeId;
  core::PlanNodeId customerPlanNodeId;
 
+ parse::ParseOptions options;
+ options.parseDecimalAsDouble = false;
+
  auto customerTotalReturn =
      PlanBuilder(planNodeIdGenerator)
          .tableScan(
@@ -117,6 +120,7 @@ TpcdsPlan TpcdsQueryBuilder::getQ1Plan() const {
 
  auto avgTotalReturn =
      PlanBuilder(planNodeIdGenerator)
+         .setParseOptions(options)
          .tableScan(
              kStoreReturns,
              getRowType(kStoreReturns, {"sr_returned_date_sk", "sr_customer_sk", "sr_return_amt", "sr_store_sk"}),
@@ -167,7 +171,7 @@ TpcdsPlan TpcdsQueryBuilder::getQ1Plan() const {
              {"ctr_store_sk"},
              {"ctr_store_sk"},
              avgTotalReturn,
-             "ctr_total_return > avg_ctr_total_return",
+             "ctr_total_return::DECIMAL(38,2) > avg_ctr_total_return::DECIMAL(38,2)",
              {"ctr_customer_sk"})
          .hashJoin(
              {"ctr_customer_sk"},
