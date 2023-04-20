@@ -127,7 +127,8 @@ private:
  static constexpr const char* kWebSales = "web_sales";
  static constexpr const char* kWebSite = "web_site";
 
- std::shared_ptr<memory::MemoryPool> pool_ = memory::getDefaultMemoryPool();
+ std::shared_ptr<memory::MemoryPool> pool_ =
+     memory::addDefaultLeafMemoryPool();
 };
 
 } // namespace facebook::velox::exec::test
