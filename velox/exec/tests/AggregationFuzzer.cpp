@@ -578,12 +578,20 @@ void AggregationFuzzer::go() {
       auto call = makeFunctionCall(signature.name, argNames);
 
       // 10% of times test window operator.
-      if (vectorFuzzer_.coinToss(0.1)) {
+      if (vectorFuzzer_.coinToss(0.9)) {
         ++stats_.numWindow;
 
         auto partitionKeys = generateKeys("p", argNames, argTypes);
         auto sortingKeys = generateKeys("s", argNames, argTypes);
         auto input = generateInputDataWithRowNumber(argNames, argTypes);
+
+        std::cout << "== Input ==" << std::endl;
+        for (auto row : input) {
+          std::cout << "  Row" << std::endl;
+          for (auto col : row->children()) {
+            std::cout << col->toString(true) << std::endl;
+          }
+        }
 
         verifyWindow(
             partitionKeys, sortingKeys, {call}, input, customVerification);
@@ -980,6 +988,11 @@ void AggregationFuzzer::verifyWindow(
     if (resultOrError.exceptionPtr) {
       ++stats_.numFailed;
     }
+
+//    std::cout << "-- Input --" << std::endl;
+//    for (auto row : input) {
+//      std::cout << row->toString(true) << std::endl;
+//    }
 
     if (!customVerification && resultOrError.result) {
       if (auto expectedResult = computeDuckWindow(

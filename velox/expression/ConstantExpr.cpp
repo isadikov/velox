@@ -159,6 +159,10 @@ void appendSqlLiteral(
       appendSqlString(
           vector.wrappedVector()->toString(vector.wrappedIndex(row)), out);
       break;
+    case TypeKind::VARBINARY:
+      appendSqlString(
+          vector.wrappedVector()->toString(vector.wrappedIndex(row)), out);
+      break;
     case TypeKind::ARRAY: {
       out << "ARRAY[";
       auto arrayVector = vector.wrappedVector()->as<ArrayVector>();

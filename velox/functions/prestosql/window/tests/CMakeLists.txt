@@ -25,7 +25,7 @@ set(CMAKE_WINDOW_TEST_LINK_LIBRARIES
 
 set(CMAKE_WINDOW_TEST_MAIN_FILES Main.cpp WindowTestBase.cpp)
 
-add_executable(velox_windows_rank_test NtileTest.cpp RankTest.cpp
+add_executable(velox_windows_rank_test NtileTest.cpp RankTest.cpp WindowPrecisionTest.cpp
                                        ${CMAKE_WINDOW_TEST_MAIN_FILES})
 
 add_test(
