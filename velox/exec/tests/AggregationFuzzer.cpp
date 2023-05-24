@@ -478,11 +478,35 @@ std::vector<std::string> AggregationFuzzer::generateKeys(
   auto numKeys = boost::random::uniform_int_distribution<uint32_t>(1, 5)(rng_);
   std::vector<std::string> keys;
   for (auto i = 0; i < numKeys; ++i) {
-    keys.push_back(fmt::format("{}{}", prefix, i));
+//    keys.push_back(fmt::format("{}{}", prefix, i));
 
     // Pick random scalar type.
-    types.push_back(vectorFuzzer_.randScalarNonFloatingPointType());
-    names.push_back(keys.back());
+    std::cout << vectorFuzzer_.randScalarNonFloatingPointType()->toString() << std::endl;
+//    types.push_back(vectorFuzzer_.randScalarNonFloatingPointType());
+//    names.push_back(keys.back());
+  }
+//  return keys;
+
+  if (prefix.compare("p") == 0) {
+    keys.push_back("p0");
+    names.push_back("p0");
+    types.push_back(BOOLEAN());
+  } else if (prefix.compare("s") == 0) {
+    keys.push_back("s0");
+    names.push_back("s0");
+    types.push_back(SMALLINT());
+
+    keys.push_back("s1");
+    names.push_back("s1");
+    types.push_back(TINYINT());
+
+    keys.push_back("s2");
+    names.push_back("s2");
+    types.push_back(TINYINT());
+
+    keys.push_back("s3");
+    names.push_back("s3");
+    types.push_back(TINYINT());
   }
   return keys;
 }
@@ -581,17 +605,9 @@ void AggregationFuzzer::go() {
       if (vectorFuzzer_.coinToss(0.9)) {
         ++stats_.numWindow;
 
-        auto partitionKeys = generateKeys("p", argNames, argTypes);
-        auto sortingKeys = generateKeys("s", argNames, argTypes);
+        std::vector<std::string> partitionKeys = generateKeys("p", argNames, argTypes);
+        std::vector<std::string> sortingKeys = generateKeys("s", argNames, argTypes);
         auto input = generateInputDataWithRowNumber(argNames, argTypes);
-
-        std::cout << "== Input ==" << std::endl;
-        for (auto row : input) {
-          std::cout << "  Row" << std::endl;
-          for (auto col : row->children()) {
-            std::cout << col->toString(true) << std::endl;
-          }
-        }
 
         verifyWindow(
             partitionKeys, sortingKeys, {call}, input, customVerification);
@@ -988,11 +1004,6 @@ void AggregationFuzzer::verifyWindow(
     if (resultOrError.exceptionPtr) {
       ++stats_.numFailed;
     }
-
-//    std::cout << "-- Input --" << std::endl;
-//    for (auto row : input) {
-//      std::cout << row->toString(true) << std::endl;
-//    }
 
     if (!customVerification && resultOrError.result) {
       if (auto expectedResult = computeDuckWindow(
